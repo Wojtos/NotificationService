@@ -1,0 +1,4 @@
+example@test.com +48812321123 6336a9ca02d8f99f77080b
+test@test.com null null
+null +48555666333 null
+null null 6336a9ca02d8f99f77080b

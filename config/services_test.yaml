@@ -1,0 +1,4 @@
+parameters:
+    twilio_test_phone_number: '%env(TWILIO_TEST_PHONE_NUMBER)%'
+    aws_test_email: '%env(AWS_TEST_EMAIL)%'
+    pushy_test_device_token: '%env(PUSHY_TEST_DEVICE_TOKEN)%'

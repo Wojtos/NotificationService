@@ -1,0 +1,72 @@
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
+parameters:
+    aws_region: '%env(AWS_REGION)%'
+    aws_version: '%env(AWS_VERSION)%'
+    aws_verified_email: '%env(AWS_VERIFIED_EMAIL)%'
+    aws_key: '%env(AWS_KEY)%'
+    aws_secret: '%env(AWS_SECRET)%'
+
+    twilio_sid: '%env(TWILIO_SID)%'
+    twilio_key: '%env(TWILIO_KEY)%'
+    twilio_phone_number: '%env(TWILIO_PHONE_NUMBER)%'
+
+    pushy_key: '%env(PUSHY_KEY)%'
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        bind:
+            $awsConfig:
+                region: '%aws_region%'
+                version: '%aws_version%'
+                verified_email: '%aws_verified_email%'
+                credentials:
+                    key: '%aws_key%'
+                    secret: '%aws_secret%'
+            $twilioConfig:
+                sid: '%twilio_sid%'
+                key: '%twilio_key%'
+                phone_number: '%twilio_phone_number%'
+            $pushyKey: '%pushy_key%'
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/Notification/Domain/Entity'
+            - '../src/Notification/Domain/ValueObject'
+            - '../src/Kernel.php'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+
+    ses_notifier_configuration:
+        class: 'App\Notification\Infrastructure\Notifier\Configuration\NotifierConfiguration'
+        arguments:
+            $notifierName: 'ses'
+            $enabled: 1
+
+    pushy_notifier_configuration:
+        class: 'App\Notification\Infrastructure\Notifier\Configuration\NotifierConfiguration'
+        arguments:
+            $notifierName: 'pushy'
+            $enabled: 0
+
+    twilio_notifier_configuration:
+        class: 'App\Notification\Infrastructure\Notifier\Configuration\NotifierConfiguration'
+        arguments:
+            $notifierName: 'twilio'
+            $enabled: 1
+
+    App\Notification\Infrastructure\Notifier\Configuration\NotifierFactoryConfiguration:
+        $orderedNotifierConfigurations:
+            - '@twilio_notifier_configuration'
+            - '@pushy_notifier_configuration'
+            - '@ses_notifier_configuration'
+
